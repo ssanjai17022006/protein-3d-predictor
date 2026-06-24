@@ -1,0 +1,10 @@
+# Python environment caches
+__pycache__/
+*.pyc
+
+# Local system files
+.DS_Store
+Thumbs.db
+
+# Large Model Weights (Keep local)
+*.pth
