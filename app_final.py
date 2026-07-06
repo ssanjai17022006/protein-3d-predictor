@@ -116,7 +116,7 @@ col1, col2 = st.columns([1, 1])
 
 with col1:
     st.subheader("📥 Sequence Input Processing")
-    default_seq = "MVLSEGEWQLVLHVWAKVEADVAGHGQDILIRLFKSHPETLEKFDRFKHLKTEAEMKASEDLKKHGVTVLTALGAILKKKGHHEAELKPLAQSHATKHKIPIKYLEFISEAIIHVLHSRHPGNFGADAQGAMNKALELFRKDIAAKYKELGYQG"
+    default_seq = "MVLSEGEWQLVLHVWAKVEADVAGHGQDILIRLFKSHPETLEKFDRFKHLKTEAEMKASEDLKKHGVTVLTALGAILKKKGHHEAELKPLAQSHATKHKIPIKY"
     user_input = st.text_area("Enter Amino Acid Sequence (Max 128 Res):", value=default_seq, height=150)
     
     predict_btn = st.button("🚀 Predict & Compute Structure")
