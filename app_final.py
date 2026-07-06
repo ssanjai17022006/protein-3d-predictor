@@ -30,7 +30,7 @@ class ProteinLSTM(nn.Module):
 MAX_LEN = 128
 AMINO_ACIDS = ["PAD", "A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"]
 AA_TO_IDX = {aa: idx for idx, aa in enumerate(AMINO_ACIDS)}
-IDX_TO_STRUCT = {0: "H", 1: "E", 2: "C"}  # 0: Helix (Red), 1: Sheet (Yellow), 2: Coil (Green)
+IDX_TO_STRUCT = {0: "H", 1: "E", 2: "C"}  # 0: Helix, 1: Sheet, 2: Coil
 
 # --- 4. Cached Model Loading Function ---
 @st.cache_resource
@@ -38,7 +38,7 @@ def load_trained_model():
     model = ProteinLSTM()
     model_path = "protein_lstm_model.pth"
     if os.path.exists(model_path):
-        # Using weights_only=True for security and 3.13+ standard compatibility
+        # Using weights_only=True for security and compatibility mapping to CPU
         model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'), weights_only=True))
         model.eval()
         return model
@@ -53,7 +53,7 @@ def preprocess_sequence(seq):
     padded_tokens = tokens + [0] * (MAX_LEN - len(tokens))
     return torch.tensor([padded_tokens], dtype=torch.long), len(seq)
 
-# --- 6. Helper Function: Render Interactive 3Dmol Mesh ---
+# --- 6. Helper Function: Render Interactive 3Dmol Mesh with Hover Labels ---
 def render_3d_mesh(pdb_filename):
     if not os.path.exists(pdb_filename):
         return f"<p style='color:red;'>Error: Template {pdb_filename} missing from path.</p>"
@@ -76,6 +76,32 @@ def render_3d_mesh(pdb_filename):
             viewer.setStyle({{}}, {{cartoon: {{color: 'spectrum'}}}});
             viewer.zoomTo();
             viewer.render();
+
+            // 🧠 INTERACTIVE HOVER INTERFACE (YOUR UPGRADE)
+            viewer.setHoverable({{}}, true,
+                function(atom, viewer, event, container) {{
+                    if(!atom.label) {{
+                        // Displays: [Residue Name] [Residue ID Number] (Atom Element)
+                        atom.label = viewer.addLabel(
+                            atom.resn + " " + atom.resi + " (" + atom.elem + ")", 
+                            {{
+                                position: atom, 
+                                backgroundColor: '#1e1e1e', 
+                                fontColor: '#ffffff',
+                                borderSize: 1,
+                                borderColor: '#ff4b4b',
+                                backgroundOpacity: 0.85
+                            }}
+                        );
+                    }}
+                }},
+                function(atom, viewer) {{
+                    if(atom.label) {{
+                        viewer.removeLabel(atom.label);
+                        delete atom.label;
+                    }}
+                }}
+            );
         }});
     </script>
     """
@@ -140,8 +166,9 @@ if predict_btn and user_input:
             
             with col2:
                 st.subheader("🔮 Simulated 3D Morphological View")
+                st.caption("✨ *Tip: Hover your mouse cursor directly over parts of the structure model to inspect atom data and residue identifiers.*")
                 
-                # --- NEW IMPLEMENTATION: High Visibility Structural Classification Labels ---
+                # High Visibility Structural Classification Labels
                 if template_file == "1AIE.pdb":
                     st.success("🧬 **Active Structural Template: Human Villin Headpiece (Alpha-Helix Dominant)**")
                     st.caption("This conformation represents tight, right-handed spiral structural matrices structural folding patterns.")
